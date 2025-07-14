@@ -3,3 +3,5 @@ __pycache__/
 *.csv
 *.npz
 *.xlsx
+*.pkl
+camiones1.pkl
