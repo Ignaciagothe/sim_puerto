@@ -8,9 +8,14 @@ st.title("🚢 Simulación logística de descarga (Puerto)")
 st.markdown(
     "Ajusta los **parámetros** y pulsa **Simular** para evaluar cada escenario."
 )
+# ui_puerto.py  (solo las partes nuevas/actualizadas)
 
-# --- 1 · Panel de entradas ------------------------------------------------
 with st.sidebar:
+    st.header("Archivos de datos")
+    file_camiones = st.file_uploader("camiones.csv", type="csv")
+    file_buques   = st.file_uploader("naves_epic.xlsx", type=["xlsx", "xls"])
+
+    st.divider()           # separador visual
     st.header("Parámetros del escenario")
     años = st.number_input("Años a simular", 1, 10, 3)
     cam_dedic = st.number_input("Camiones dedicados", 0, 100, 0)
@@ -20,14 +25,25 @@ with st.sidebar:
     buques_iniciales = st.slider("Buques en rada al inicio", 0, 15, 7)
     semilla = st.number_input("Seed aleatoria (opcional)", 0, value=42, step=1)
 
-    simular = st.button("▶️ Simular")
+    simular = st.button("▶️ Simular", disabled=not (file_camiones and file_buques))
+
 
 # --- 2 · Ejecución y cacheo ----------------------------------------------
+# -------------- Ejecución --------------
+
+
+    # 3 · Mostrar resultados (igual que antes)…
+
 @st.cache_data(show_spinner="Ejecutando simulación…", ttl=3600)
 def run_cached(**kwargs):
     return run_sim(**kwargs)
-
+    
 if simular:
+    # 1 · Convertir a DataFrame
+    camiones_df = pd.read_csv(file_camiones)
+    buques_df   = pd.read_excel(file_buques, engine="openpyxl")
+
+    # 2 · Ejecutar simulación con datos cargados
     df_buques, df_cola, df_bodega, summary = run_cached(
         años=años,
         camiones_dedicados=cam_dedic,
@@ -36,7 +52,10 @@ if simular:
         prob=prob_bodega,
         buques_inicio_cola=buques_iniciales,
         seed=semilla,
+        camiones_df=camiones_df,
+        buques_df=buques_df,
     )
+
 
     # --- 3 · KPIs en tarjetas --------------------------------------------
     st.subheader("🔑 Indicadores clave")
@@ -58,3 +77,5 @@ if simular:
     # --- 5 · Descarga -----------------------------------------------------
     csv = df_buques.to_csv(index=False).encode()
     st.download_button("Descargar buques.csv", csv, "buques.csv", "text/csv")
+# dentro del venv
+

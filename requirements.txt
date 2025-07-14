@@ -5,3 +5,4 @@ simpy
 matplotlib
 seaborn        
 scipy       
+openpyxl

@@ -1,9 +1,11 @@
 # sim_puerto.py
 import pandas as pd
 from functools import wraps
-from clases_sim import simulacion   # importa la función tal cual
 
-# --- Función “fachada” con firma clara ---------------------------------
+# sim_puerto.py  (fragmento)
+
+from clases_sim import simulacion, load_data
+
 def run_sim(
     años: int = 3,
     camiones_dedicados: int = 0,
@@ -12,7 +14,13 @@ def run_sim(
     prob: float = 0.0,
     buques_inicio_cola: int = 7,
     seed: int | None = None,
+    camiones_df: pd.DataFrame | None = None,
+    buques_df: pd.DataFrame | None = None,
 ):
+    # ← 1 · Carga de datos dinámica
+    if camiones_df is not None and buques_df is not None:
+        load_data(camiones_df, buques_df)
+
     """Lanza la simulación y devuelve dataframes + KPIs resumidos."""
     res = simulacion(
         años=años,
