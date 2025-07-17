@@ -2,6 +2,8 @@
 """
 Enhanced Streamlit Interface for Port Simulation
 Puerto Panul - Logistics Simulation Tool
+Developed by ELOGIS - Consultoría Logística
+Lead Consultant: Herman Gothe
 """
 
 from __future__ import annotations
@@ -22,6 +24,7 @@ from datetime import datetime
 # Import the actual simulation modules
 try:
     from clases_sim import simulacion, load_data
+    import clases_sim
     from sim_puerto import run_sim
     SIMULATION_AVAILABLE = True
 except ImportError:
@@ -32,7 +35,7 @@ except ImportError:
 # 🔧 Page Configuration
 # -----------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Puerto Panul - Simulación Logística",
+    page_title="ELOGIS - Simulación Puerto Panul",
     page_icon="🚢",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -62,12 +65,30 @@ OPTIONAL_BUQUES_COLS: List[str] = [
 # -----------------------------------------------------------------------------
 st.markdown("""
 <style>
-    .stMetric {
-        background-color: #f0f2f6;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    /* Professional Corporate Styling */
+    .main {
+        background-color: #fafafa;
     }
+    
+    .stMetric {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        border: 1px solid #e0e0e0;
+    }
+    
+    .stMetric label {
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .stMetric div[data-testid="metric-container"] > div[data-testid="metric-value"] {
+        color: #1a73e8;
+        font-weight: 700;
+    }
+    
     .success-box {
         padding: 1rem;
         border-radius: 0.5rem;
@@ -76,6 +97,7 @@ st.markdown("""
         color: #155724;
         margin: 1rem 0;
     }
+    
     .warning-box {
         padding: 1rem;
         border-radius: 0.5rem;
@@ -83,6 +105,111 @@ st.markdown("""
         border: 1px solid #ffeeba;
         color: #856404;
         margin: 1rem 0;
+    }
+    
+    /* Professional headers */
+    h1 {
+        color: #1a1a1a;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+    
+    h2, h3 {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    /* Sidebar styling */
+    .css-1d391kg {
+        background-color: #f8f9fa;
+    }
+    
+    /* Button styling */
+    .stButton > button {
+        transition: all 0.3s ease;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        padding: 10px 20px;
+        font-weight: 600;
+    }
+    
+    /* Company branding */
+    .company-header {
+        background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .company-header h1 {
+        color: white;
+        margin: 0;
+        font-size: 2.5rem;
+    }
+    
+    .company-header p {
+        color: rgba(255,255,255,0.9);
+        margin: 0.5rem 0 0 0;
+        font-size: 1.1rem;
+    }
+    
+    .professional-footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-top: 3rem;
+        text-align: center;
+    }
+    
+    .professional-footer p {
+        margin: 0.3rem 0;
+        color: rgba(255,255,255,0.9);
+    }
+    
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    
+    /* Info boxes */
+    .stAlert {
+        border-radius: 8px;
+        border-left: 4px solid;
+    }
+    
+    /* Dataframe styling */
+    .dataframe {
+        font-size: 0.9rem;
+    }
+    
+    /* Progress bar */
+    .stProgress > div > div > div {
+        background-color: #1a73e8;
+    }
+    
+    .professional-footer .company-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 0.5rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -101,6 +228,7 @@ with st.expander("📖 **Guía de Usuario** - Cómo usar esta herramienta", expa
     2. **Configuración del Escenario**
        - Ajusta los parámetros de simulación según tu escenario
        - Los valores por defecto están basados en operaciones típicas
+       - Configura tiempos operacionales en la sección expandible "⏱️ Tiempos Operacionales"
        
     3. **Ejecutar Simulación**
        - Presiona el botón **▶️ Ejecutar Simulación**
@@ -124,6 +252,8 @@ with st.expander("📖 **Guía de Usuario** - Cómo usar esta herramienta", expa
     - Usa diferentes seeds para comparar múltiples escenarios
     - Los camiones dedicados ayudan cuando hay congestión
     - La probabilidad de bodega afecta el flujo de material
+    - Ajusta los tiempos operacionales para simular diferentes eficiencias
+    - Modifica el factor de tasa de llegada para simular diferentes demandas
     """)
 
 # -----------------------------------------------------------------------------
@@ -153,35 +283,83 @@ def validate_dataframe(df: pd.DataFrame, required_cols: List[str], name: str) ->
     return len(missing) == 0, missing
 
 def create_metric_card(label: str, value: float) -> None:
-    """Create a simple metric card without color coding."""
-    st.metric(label, f"{value:,.2f}")
+    """Create a professional metric card."""
+    if label == "Buques atendidos" or label == "Buques perdidos":
+        st.metric(label, f"{int(value):,}")
+    else:
+        st.metric(label, f"{value:,.2f}")
 
-def generate_summary_report(df_buques: pd.DataFrame, df_cola: pd.DataFrame, df_bodega: pd.DataFrame = None) -> str:
-    """Generate a text summary report of the simulation results."""
+def generate_summary_report(df_buques: pd.DataFrame, df_cola: pd.DataFrame, df_bodega: pd.DataFrame = None, params: dict = None) -> str:
+    """Generate a professional text summary report of the simulation results."""
     report = f"""
-# Reporte de Simulación - Puerto Panul
-**Fecha:** {datetime.now().strftime("%Y-%m-%d %H:%M")}
+================================================================================
+                    ELOGIS - CONSULTORÍA LOGÍSTICA
+                    Reporte de Simulación Puerto Panul
+================================================================================
 
-## Resumen Ejecutivo
+Fecha de generación: {datetime.now().strftime("%Y-%m-%d %H:%M")}
+Consultor: Herman Gothe
+Cliente: Puerto Panul
 
-### Indicadores Clave
-- **Buques atendidos:** {len(df_buques):,}
-- **Tiempo promedio de espera:** {df_buques['Tiempo de espera (dias)'].mean():.2f} días
-- **Tiempo promedio de descarga:** {df_buques['Tiempo descarga (dias)'].mean():.2f} días
-- **Largo promedio de cola:** {df_cola['Largo cola rada'].mean():.2f} buques
+================================================================================
+PARÁMETROS DE SIMULACIÓN
+================================================================================
+"""
+    
+    if params:
+        report += f"""
+Configuración General:
+---------------------
+• Años simulados: {params.get('años', 'N/A')}
+• Semilla aleatoria: {params.get('semilla', 'N/A')}
+• Buques iniciales en rada: {params.get('buques_inicial', 'N/A')}
 
-### Estadísticas de Buques
+Configuración de Camiones:
+-------------------------
+• Camiones dedicados: {params.get('camiones_dedicados', 'N/A')}
+• Capacidad camiones dedicados: {params.get('capacidad_dedicados', 'N/A')} ton
+• Probabilidad envío a bodega: {params.get('prob_bodega', 'N/A'):.2%}
+
+Configuración de Bodega:
+-----------------------
+• Inventario inicial: {params.get('grano_inicial', 'N/A'):,} ton
+"""
+    
+    report += f"""
+================================================================================
+RESUMEN EJECUTIVO
+================================================================================
+
+Indicadores Clave de Rendimiento (KPIs):
+----------------------------------------
+• Buques atendidos: {len(df_buques):,}
+• Tiempo promedio de espera: {df_buques['Tiempo de espera (dias)'].mean():.2f} días
+• Tiempo promedio de descarga: {df_buques['Tiempo descarga (dias)'].mean():.2f} días
+• Largo promedio de cola: {df_cola['Largo cola rada'].mean():.2f} buques
+
+Estadísticas de Buques:
+----------------------
 {df_buques.describe().to_string()}
 
-### Estadísticas de Cola
+Estadísticas de Cola:
+--------------------
 {df_cola.describe().to_string()}
 """
     
     if df_bodega is not None:
         report += f"""
-### Estadísticas de Bodega
-- **Toneladas finales en bodega:** {df_bodega['ton restante bodega'].iloc[-1]:,.0f}
-- **Movimientos totales:** {len(df_bodega):,}
+Estadísticas de Bodega:
+----------------------
+• Toneladas finales en bodega: {df_bodega['ton restante bodega'].iloc[-1]:,.0f}
+• Movimientos totales: {len(df_bodega):,}
+• Camiones que cargaron en bodega: {len(df_bodega[df_bodega['actividad camion '] == 'cargar en bodega']):,}
+"""
+    
+    report += """
+================================================================================
+                           © 2025 ELOGIS
+              Consultoría especializada en logística portuaria
+================================================================================
 """
     
     return report
@@ -189,13 +367,38 @@ def generate_summary_report(df_buques: pd.DataFrame, df_cola: pd.DataFrame, df_b
 # -----------------------------------------------------------------------------
 # 🎯 Main Application
 # -----------------------------------------------------------------------------
-st.title("🚢 Puerto Panul - Simulación Logística de Descarga")
+    # Professional Company Header with session info
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown("""
+        <div class="company-header">
+            <h1>🚢 Puerto Panul - Sistema de Simulación Logística</h1>
+            <p>Desarrollado por <strong>ELOGIS</strong> - Consultoría en Logística y Optimización</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div style='text-align: right; padding: 1rem; color: #666;'>
+            <small><strong>Sesión activa</strong></small><br>
+            <small>{datetime.now().strftime("%d/%m/%Y %H:%M")}</small>
+        </div>
+        """, unsafe_allow_html=True)
+
 st.markdown("### Sistema de análisis y optimización de operaciones portuarias")
 
 # -----------------------------------------------------------------------------
 # 📁 Sidebar - Data Loading and Parameters
 # -----------------------------------------------------------------------------
 with st.sidebar:
+    # Company branding in sidebar
+    st.markdown("""
+    <div style='text-align: center; padding: 1rem; background-color: #1a73e8; color: white; border-radius: 10px; margin-bottom: 1rem;'>
+        <h3 style='margin: 0; color: white;'>ELOGIS</h3>
+        <p style='margin: 0; font-size: 0.9rem;'>Consultoría Logística</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.header("📁 1. Carga de Datos Históricos")
     
     # File uploaders
@@ -221,9 +424,10 @@ with st.sidebar:
         if cam_df is not None:
             valid, missing = validate_dataframe(cam_df, REQUIRED_CAMIONES_COLS, "Camiones")
             if valid:
-                st.success("✅ Archivo de camiones cargado correctamente")
-                with st.expander("Vista previa - Camiones"):
+                st.success("✅ Archivo de camiones validado correctamente")
+                with st.expander("👁️ Vista previa - Camiones", expanded=False):
                     st.dataframe(cam_df.head(), use_container_width=True)
+                    st.caption(f"Mostrando primeras 5 filas de {len(cam_df):,} registros totales")
                 data_valid = True
             else:
                 st.error(f"❌ Faltan columnas en camiones: {', '.join(missing)}")
@@ -234,9 +438,10 @@ with st.sidebar:
         if buq_df is not None:
             valid, missing = validate_dataframe(buq_df, REQUIRED_BUQUES_COLS, "Buques")
             if valid:
-                st.success("✅ Archivo de buques cargado correctamente")
-                with st.expander("Vista previa - Buques"):
+                st.success("✅ Archivo de buques validado correctamente")
+                with st.expander("👁️ Vista previa - Buques", expanded=False):
                     st.dataframe(buq_df.head(), use_container_width=True)
+                    st.caption(f"Mostrando primeras 5 filas de {len(buq_df):,} registros totales")
                 # Check for optional columns
                 optional_present = [col for col in OPTIONAL_BUQUES_COLS if col in buq_df.columns]
                 if optional_present:
@@ -314,14 +519,138 @@ with st.sidebar:
             help="Cola inicial de buques esperando"
         )
     
+    with st.expander("⏱️ Tiempos Operacionales", expanded=False):
+        st.info("💡 Todos los tiempos están expresados en **minutos**")
+        
+        st.markdown("**Tiempos de Camiones (minutos)**")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            tiempo_puerta_entrada = st.number_input(
+                "Tiempo puerta entrada",
+                min_value=0.5,
+                max_value=10.0,
+                value=2.0,
+                step=0.5,
+                help="Tiempo para entrar al puerto"
+            )
+            
+            tiempo_puerta_salida = st.number_input(
+                "Tiempo puerta salida",
+                min_value=0.5,
+                max_value=15.0,
+                value=8.16,
+                step=0.5,
+                help="Tiempo para salir del puerto"
+            )
+            
+            tiempo_cargar_chute = st.number_input(
+                "Tiempo cargar en chute",
+                min_value=1.0,
+                max_value=20.0,
+                value=7.28,
+                step=0.5,
+                help="Tiempo de carga en el chute"
+            )
+        
+        with col2:
+            tiempo_a_bodega = st.number_input(
+                "Tiempo traslado a bodega",
+                min_value=1.0,
+                max_value=15.0,
+                value=3.0,
+                step=0.5,
+                help="Tiempo de viaje a bodega"
+            )
+            
+            tiempo_descargar_bodega = st.number_input(
+                "Tiempo descargar en bodega",
+                min_value=1.0,
+                max_value=20.0,
+                value=6.0,
+                step=0.5,
+                help="Tiempo para descargar"
+            )
+            
+            tiempo_cargar_bodega = st.number_input(
+                "Tiempo cargar en bodega",
+                min_value=1.0,
+                max_value=20.0,
+                value=6.0,
+                step=0.5,
+                help="Tiempo para cargar"
+            )
+            
+            tiempo_salida_bodega = st.number_input(
+                "Tiempo salida de bodega",
+                min_value=0.5,
+                max_value=10.0,
+                value=2.0,
+                step=0.5,
+                help="Tiempo para salir de bodega"
+            )
+        
+        st.markdown("**Tiempos de Buques (minutos)**")
+        col3, col4 = st.columns(2)
+        
+        with col3:
+            tiempo_atraque = st.number_input(
+                "Tiempo de atraque",
+                min_value=60,
+                max_value=1000,
+                value=462,
+                step=30,
+                help="Tiempo total de atraque"
+            )
+            
+            tiempo_llegada_camiones = st.number_input(
+                "Tiempo llegada camiones",
+                min_value=60,
+                max_value=800,
+                value=440,
+                step=30,
+                help="Tiempo antes de que lleguen camiones"
+            )
+            
+            # Validación de tiempos
+            if tiempo_llegada_camiones >= tiempo_atraque:
+                st.warning("⚠️ El tiempo de llegada de camiones debe ser menor al tiempo de atraque")
+        
+        with col4:
+            tasa_llegada_factor = st.number_input(
+                "Factor tasa llegada buques",
+                min_value=0.5,
+                max_value=2.0,
+                value=1.08,
+                step=0.01,
+                help="Factor multiplicador de llegada"
+            )
+            
+            max_rada = st.number_input(
+                "Máximo buques en rada",
+                min_value=1,
+                max_value=20,
+                value=8,
+                help="Capacidad máxima de la rada"
+            )
+    
     # Simulation button
     st.divider()
-    sim_button = st.button(
-        "▶️ Ejecutar Simulación",
-        disabled=not (data_valid and SIMULATION_AVAILABLE),
-        use_container_width=True,
-        type="primary"
-    )
+    col1, col2 = st.columns(2)
+    with col1:
+        sim_button = st.button(
+            "▶️ Ejecutar Simulación",
+            disabled=not (data_valid and SIMULATION_AVAILABLE),
+            use_container_width=True,
+            type="primary"
+        )
+    with col2:
+        if st.button(
+            "🔄 Valores por Defecto",
+            use_container_width=True,
+            help="Restaurar todos los parámetros a sus valores por defecto"
+        ):
+            st.rerun()
 
 # -----------------------------------------------------------------------------
 # 📊 Main Content Area
@@ -352,6 +681,26 @@ if sim_button and data_valid:
             
             # Run simulation
             progress_bar.progress(60, text="Ejecutando simulación...")
+            
+            # Prepare time parameters dictionary
+            time_params = {
+                'TIEMPO_PUERTA_ENTRADA': tiempo_puerta_entrada,
+                'TIEMPO_PUERTA_SALIDA': tiempo_puerta_salida,
+                'TIEMPO_ENTRADA_CAMION_DEDICADO': tiempo_puerta_entrada,  # Same as regular entrance
+                'TIEMPO_CARGAR_EN_CHUTE': tiempo_cargar_chute,
+                'TIEMPO_A_BODEGA': tiempo_a_bodega,
+                'TIEMPO_DESCARGAR_EN_BODEGA': tiempo_descargar_bodega,
+                'TIEMPO_CARGAR_EN_BODEGA': tiempo_cargar_bodega,
+                'TIEMPO_SALIDA_DE_BODEGA': tiempo_salida_bodega,
+                'TIEMPO_ATRAQUE': tiempo_atraque,
+                'TIEMPO_LLEGADA_CAMIONES': tiempo_llegada_camiones,
+                'TASA_LLEGADA_FACTOR': tasa_llegada_factor,
+                'MAXIMO_RADA': int(max_rada)
+            }
+            
+            # Set parameters in clases_sim module
+            for param, value in time_params.items():
+                setattr(clases_sim, param, value)
             
             if cam_dedic > 0:
                 df_buques, df_cola, df_bodega = simulacion(
@@ -391,7 +740,18 @@ if sim_button and data_valid:
                     'grano_inicial': grano_ini,
                     'prob_bodega': prob_bodega,
                     'buques_inicial': buques_init,
-                    'semilla': semilla
+                    'semilla': semilla,
+                    'tiempo_puerta_entrada': tiempo_puerta_entrada,
+                    'tiempo_puerta_salida': tiempo_puerta_salida,
+                    'tiempo_cargar_chute': tiempo_cargar_chute,
+                    'tiempo_a_bodega': tiempo_a_bodega,
+                    'tiempo_descargar_bodega': tiempo_descargar_bodega,
+                    'tiempo_cargar_bodega': tiempo_cargar_bodega,
+                    'tiempo_salida_bodega': tiempo_salida_bodega,
+                    'tiempo_atraque': tiempo_atraque,
+                    'tiempo_llegada_camiones': tiempo_llegada_camiones,
+                    'tasa_llegada_factor': tasa_llegada_factor,
+                    'max_rada': int(max_rada)
                 }
             }
             
@@ -399,7 +759,8 @@ if sim_button and data_valid:
             time.sleep(0.5)
             progress_bar.empty()
             
-            st.success("✅ Simulación completada exitosamente")
+            st.balloons()
+            st.success("✅ Simulación completada exitosamente - Resultados listos para análisis")
             
         except Exception as e:
             progress_bar.empty()
@@ -415,22 +776,22 @@ if st.session_state.simulation_results:
     params = results['params']
     
     # KPI Dashboard
-    st.header("📊 Panel de Indicadores Clave (KPIs)")
+    st.header("📊 Panel de Control - Indicadores Clave de Desempeño")
     
     # Calculate KPIs
     kpis = {
-        "Buques atendidos": (len(df_buques), None),
-        "Tiempo espera promedio (días)": (df_buques["Tiempo de espera (dias)"].mean(), "Tiempo espera promedio (días)"),
-        "Tiempo descarga promedio (días)": (df_buques["Tiempo descarga (dias)"].mean(), "Tiempo descarga promedio (días)"),
-        "Largo cola promedio": (df_cola["Largo cola rada"].mean(), "Largo cola promedio"),
+        "Buques atendidos": len(df_buques),
+        "Tiempo espera promedio (días)": df_buques["Tiempo de espera (dias)"].mean(),
+        "Tiempo descarga promedio (días)": df_buques["Tiempo descarga (dias)"].mean(),
+        "Largo cola promedio": df_cola["Largo cola rada"].mean(),
     }
     
     if 'total buques perdidos' in df_cola.columns:
-        kpis["Buques perdidos"] = (df_cola["total buques perdidos"].max(), "Buques perdidos")
+        kpis["Buques perdidos"] = df_cola["total buques perdidos"].max()
     
     # Display KPIs in columns
     cols = st.columns(len(kpis))
-    for col, (label, (value, threshold_key)) in zip(cols, kpis.items()):
+    for col, (label, value) in zip(cols, kpis.items()):
         with col:
             create_metric_card(label, value)
     
@@ -445,14 +806,11 @@ if st.session_state.simulation_results:
         with col3:
             camiones_bodega_count = len(df_bodega[df_bodega['actividad camion '] == 'cargar en bodega']) if 'actividad camion ' in df_bodega.columns else 0
             st.metric("Camiones a bodega", f"{camiones_bodega_count}")
-        # with col3:
-            
-        #     st.metric("Camiones a bodega", f"{params['camiones_dedicados']}")
     
     # Tabs for detailed analysis
-    st.header("📈 Análisis Detallado")
+    st.header("📈 Centro de Análisis Detallado")
     tab_summary, tab_charts, tab_data, tab_export = st.tabs(
-        ["📋 Resumen", "📊 Visualizaciones", "🗃️ Datos", "💾 Exportar"]
+        ["📋 Resumen Estadístico", "📊 Visualizaciones Avanzadas", "🗃️ Datos Completos", "💾 Centro de Exportación"]
     )
     
     # Summary Tab
@@ -492,71 +850,133 @@ if st.session_state.simulation_results:
         with col1:
             # Waiting time distribution
             fig, ax = plt.subplots(figsize=(8, 6))
+            sns.set_style("whitegrid")
             sns.histplot(data=df_buques, x='Tiempo de espera (dias)', 
-                        bins=30, kde=True, color='skyblue', ax=ax)
-            ax.set_title('Distribución de Tiempo de Espera', fontsize=14, fontweight='bold')
-            ax.set_xlabel('Días')
-            ax.set_ylabel('Frecuencia')
-            ax.grid(True, alpha=0.3)
+                        bins=30, kde=True, color='#1a73e8', alpha=0.7, ax=ax)
+            ax.set_title('Distribución de Tiempo de Espera', fontsize=16, fontweight='bold', pad=20)
+            ax.set_xlabel('Días', fontsize=12)
+            ax.set_ylabel('Frecuencia', fontsize=12)
+            ax.grid(True, alpha=0.3, linestyle='--')
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            plt.tight_layout()
             st.pyplot(fig)
             
             # Queue length over time
             chart = alt.Chart(df_cola).mark_line(
-                point=alt.OverlayMarkDef(filled=False, fill="white")
+                strokeWidth=3,
+                color='#1a73e8',
+                point=alt.OverlayMarkDef(
+                    filled=True, 
+                    fill="#1a73e8",
+                    size=80
+                )
             ).encode(
-                x=alt.X('Dia:Q', title='Día'),
-                y=alt.Y('Largo cola rada:Q', title='Buques en cola'),
-                tooltip=['Dia', 'Largo cola rada']
+                x=alt.X('Dia:Q', title='Día de Simulación'),
+                y=alt.Y('Largo cola rada:Q', title='Número de Buques en Cola'),
+                tooltip=[
+                    alt.Tooltip('Dia:Q', title='Día'),
+                    alt.Tooltip('Largo cola rada:Q', title='Buques en cola')
+                ]
             ).properties(
-                title='Evolución de la Cola en Rada',
+                title={
+                    "text": 'Evolución de la Cola en Rada',
+                    "fontSize": 16,
+                    "fontWeight": "bold"
+                },
                 width=600,
                 height=400
+            ).configure_axis(
+                labelFontSize=12,
+                titleFontSize=14
             ).interactive()
             st.altair_chart(chart, use_container_width=True)
         
         with col2:
             # Unloading time distribution
             fig, ax = plt.subplots(figsize=(8, 6))
+            sns.set_style("whitegrid")
             sns.histplot(data=df_buques, x='Tiempo descarga (dias)', 
-                        bins=30, kde=True, color='lightgreen', ax=ax)
-            ax.set_title('Distribución de Tiempo de Descarga', fontsize=14, fontweight='bold')
-            ax.set_xlabel('Días')
-            ax.set_ylabel('Frecuencia')
-            ax.grid(True, alpha=0.3)
+                        bins=30, kde=True, color='#34a853', alpha=0.7, ax=ax)
+            ax.set_title('Distribución de Tiempo de Descarga', fontsize=16, fontweight='bold', pad=20)
+            ax.set_xlabel('Días', fontsize=12)
+            ax.set_ylabel('Frecuencia', fontsize=12)
+            ax.grid(True, alpha=0.3, linestyle='--')
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            plt.tight_layout()
             st.pyplot(fig)
             
             # Tonnage vs time scatter
-            scatter = alt.Chart(df_buques).mark_circle(size=60).encode(
-                x=alt.X('Tiempo de espera (dias):Q', title='Tiempo de espera (días)'),
-                y=alt.Y('Tiempo descarga (dias):Q', title='Tiempo de descarga (días)'),
-                size=alt.Size('Tonelaje buque:Q', title='Tonelaje'),
+            scatter = alt.Chart(df_buques).mark_circle(size=100, opacity=0.8).encode(
+                x=alt.X('Tiempo de espera (dias):Q', 
+                       title='Tiempo de espera (días)',
+                       scale=alt.Scale(zero=False)),
+                y=alt.Y('Tiempo descarga (dias):Q', 
+                       title='Tiempo de descarga (días)',
+                       scale=alt.Scale(zero=False)),
+                size=alt.Size('Tonelaje buque:Q', 
+                             title='Tonelaje',
+                             scale=alt.Scale(range=[100, 400])),
                 color=alt.Color('Largo cola al arribo:Q', 
                                scale=alt.Scale(scheme='viridis'),
                                title='Cola al arribo'),
-                tooltip=['BuqueID', 'Tonelaje buque', 'Tiempo de espera (dias)', 
-                        'Tiempo descarga (dias)', 'Largo cola al arribo']
+                tooltip=[
+                    alt.Tooltip('BuqueID:N', title='ID Buque'),
+                    alt.Tooltip('Tonelaje buque:Q', title='Tonelaje', format=',.0f'),
+                    alt.Tooltip('Tiempo de espera (dias):Q', title='Espera (días)', format='.2f'),
+                    alt.Tooltip('Tiempo descarga (dias):Q', title='Descarga (días)', format='.2f'),
+                    alt.Tooltip('Largo cola al arribo:Q', title='Cola al arribo')
+                ]
             ).properties(
-                title='Relación Espera vs Descarga por Buque',
+                title={
+                    "text": 'Análisis Multivariable: Espera vs Descarga',
+                    "fontSize": 16,
+                    "fontWeight": "bold"
+                },
                 width=600,
                 height=400
+            ).configure_axis(
+                labelFontSize=12,
+                titleFontSize=14
             ).interactive()
             st.altair_chart(scatter, use_container_width=True)
         
         # Additional charts
         if df_bodega is not None:
-            st.subheader("📦 Análisis de Bodega")
+            st.subheader("📦 Análisis de Gestión de Bodega")
             
             # Inventory evolution
-            bodega_chart = alt.Chart(df_bodega.reset_index()).mark_line(
-                strokeWidth=3
+            bodega_chart = alt.Chart(df_bodega.reset_index()).mark_area(
+                line={'color':'#ea4335', 'strokeWidth': 3},
+                color=alt.Gradient(
+                    gradient='linear',
+                    stops=[
+                        alt.GradientStop(color='#ea4335', offset=0),
+                        alt.GradientStop(color='#fbbc04', offset=1)
+                    ],
+                    x1=1, x2=1, y1=1, y2=0
+                ),
+                opacity=0.6
             ).encode(
-                x=alt.X('index:Q', title='Movimiento #'),
-                y=alt.Y('ton restante bodega:Q', title='Toneladas en bodega'),
-                tooltip=['index', 'ton restante bodega', 'actividad camion ']
+                x=alt.X('index:Q', title='Número de Movimiento'),
+                y=alt.Y('ton restante bodega:Q', title='Toneladas en Bodega'),
+                tooltip=[
+                    alt.Tooltip('index:Q', title='Movimiento #'),
+                    alt.Tooltip('ton restante bodega:Q', title='Toneladas', format=',.0f'),
+                    alt.Tooltip('actividad camion :N', title='Actividad')
+                ]
             ).properties(
-                title='Evolución del Inventario en Bodega',
+                title={
+                    "text": 'Evolución del Inventario en Bodega',
+                    "fontSize": 16,
+                    "fontWeight": "bold"
+                },
                 width=800,
                 height=400
+            ).configure_axis(
+                labelFontSize=12,
+                titleFontSize=14
             ).interactive()
             st.altair_chart(bodega_chart, use_container_width=True)
     
@@ -574,7 +994,10 @@ if st.session_state.simulation_results:
     
     # Export Tab
     with tab_export:
-        st.subheader("💾 Descargar Resultados")
+        st.markdown("### 💾 Centro de Exportación de Resultados")
+        st.info("📊 Todos los archivos incluyen metadatos de la simulación y están listos para análisis posterior")
+        
+        st.subheader("Descargas Individuales")
         
         col1, col2, col3 = st.columns(3)
         
@@ -610,8 +1033,9 @@ if st.session_state.simulation_results:
                 )
         
         # Generate and download summary report
-        st.subheader("📄 Reporte Resumen")
-        report = generate_summary_report(df_buques, df_cola, df_bodega)
+        st.subheader("📄 Reporte Ejecutivo")
+        # Pass params to report generation
+        report = generate_summary_report(df_buques, df_cola, df_bodega, params)
         st.download_button(
             label="📥 Descargar Reporte Completo (TXT)",
             data=report,
@@ -622,7 +1046,7 @@ if st.session_state.simulation_results:
         # Export all data as Excel
         st.subheader("📊 Exportar Todo a Excel")
         buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             df_buques.to_excel(writer, sheet_name='Buques', index=False)
             df_cola.to_excel(writer, sheet_name='Cola', index=False)
             if df_bodega is not None:
@@ -641,12 +1065,16 @@ if st.session_state.simulation_results:
         )
 
 # Footer
-st.markdown("---")
+st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown(
     """
-    <div style='text-align: center; color: #666;'>
-        <p>Puerto Panul - Sistema de Simulación Logística v2.0</p>
-        <p>Desarrollado para optimización de operaciones portuarias</p>
+    <div class="professional-footer">
+        <div class="company-name">ELOGIS - Consultoría Logística</div>
+        <p>Sistema de Simulación Puerto Panul</p>
+        <p>Herman Gothe - © 2025 ELOGIS</p>
+        <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+            Soluciones especializadas en optimización de operaciones y logística
+        </p>
     </div>
     """,
     unsafe_allow_html=True
