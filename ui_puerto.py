@@ -13,7 +13,7 @@ st.markdown(
 with st.sidebar:
     st.header("Archivos de datos")
     file_camiones = st.file_uploader("camiones.csv", type="csv")
-    file_buques   = st.file_uploader("naves_epic.xlsx", type=["xlsx", "xls"])
+    file_buques   = st.file_uploader("buques.xlsx", type=["xlsx", "xls"])
 
     st.divider()           # separador visual
     st.header("Parámetros del escenario")
