@@ -622,7 +622,7 @@ if st.session_state.simulation_results:
         # Export all data as Excel
         st.subheader("📊 Exportar Todo a Excel")
         buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             df_buques.to_excel(writer, sheet_name='Buques', index=False)
             df_cola.to_excel(writer, sheet_name='Cola', index=False)
             if df_bodega is not None:
