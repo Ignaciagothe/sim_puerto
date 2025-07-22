@@ -222,8 +222,8 @@ with st.expander("📖 **Guía de Usuario** - Cómo usar esta herramienta", expa
     ### 🚀 Inicio Rápido
     
     1. **Carga de Datos** (Panel Izquierdo)
-       - Sube el archivo de **camiones** (CSV o Excel) con las columnas: `año`, `turno`, `min_entre_camiones`, `capacidad`
-       - Sube el archivo de **buques** (CSV o Excel) con las columnas requeridas
+       - Sube el archivo de **camiones** (CSV o Excel)
+       - Sube el archivo de **buques** (CSV o Excel)
        
     2. **Configuración del Escenario**
        - Ajusta los parámetros de simulación según tu escenario
@@ -238,6 +238,54 @@ with st.expander("📖 **Guía de Usuario** - Cómo usar esta herramienta", expa
        - Revisa los KPIs principales
        - Explora las visualizaciones en las diferentes pestañas
        - Descarga los resultados para análisis posterior
+    
+    ---
+    
+    ### 📁 Formato de Archivos de Entrada
+    
+    #### **Archivo de Camiones**
+    El archivo debe contener las siguientes columnas (nombres exactos, sensible a mayúsculas/minúsculas):
+    
+    | Columna | Descripción | Tipo de Dato | Ejemplo |
+    |---------|-------------|--------------|---------|
+    | `año` | Año del registro | Número entero | 2023 |
+    | `turno` | Turno de trabajo (1, 2 o 3) | Número entero | 1 |
+    | `min_entre_camiones` | Minutos entre llegadas | Número decimal | 15.5 |
+    | `capacidad` | Capacidad del camión en toneladas | Número decimal | 30.0 |
+    
+    **Ejemplo de formato:**
+    ```
+    año,turno,min_entre_camiones,capacidad
+    2023,1,12.5,30
+    2023,2,15.0,35
+    2023,3,18.2,30
+    ```
+    
+    #### **Archivo de Buques**
+    El archivo debe contener las siguientes columnas obligatorias:
+    
+    | Columna | Descripción | Tipo de Dato | Ejemplo |
+    |---------|-------------|--------------|---------|
+    | `tiempo_descarga` | Horas de descarga | Número decimal | 48.5 |
+    | `tiempo_entre_arribos` | Horas entre arribos | Número decimal | 72.0 |
+    | `tiempo_de_espera` | Horas de espera | Número decimal | 24.3 |
+    | `total_detenciones` | Horas de detenciones | Número decimal | 2.5 |
+    | `total_falta_equipos` | Horas sin equipos | Número decimal | 1.0 |
+    | `tonelaje` | Tonelaje del buque | Número entero | 35000 |
+    
+    **Columnas opcionales (mejoran la precisión):**
+    - `inicio_descarga`: Fecha/hora de inicio (datetime)
+    - `primera_espia`: Fecha/hora de primera espía (datetime)
+    
+    **Ejemplo de formato:**
+    ```
+    tiempo_descarga,tiempo_entre_arribos,tiempo_de_espera,total_detenciones,total_falta_equipos,tonelaje
+    45.2,68.5,12.3,1.5,0.5,32000
+    52.1,72.0,18.6,2.0,1.0,35000
+    48.7,65.3,15.2,1.8,0.8,33500
+    ```
+    
+    ---
     
     ### 📊 Interpretación de Resultados
     
@@ -254,7 +302,14 @@ with st.expander("📖 **Guía de Usuario** - Cómo usar esta herramienta", expa
     - La probabilidad de bodega afecta el flujo de material
     - Ajusta los tiempos operacionales para simular diferentes eficiencias
     - Modifica el factor de tasa de llegada para simular diferentes demandas
-    """)
+    
+    ### ⚠️ Notas Importantes
+    - Los archivos pueden ser CSV o Excel (.xlsx, .xls)
+    - Los nombres de columnas deben coincidir exactamente
+    - Se recomienda datos de al menos 1 año para mejor precisión
+    - Los tiempos en el archivo de buques están en **horas**
+    - Los tiempos en la configuración están en **minutos**
+    """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # 🏗️ Helper Functions
@@ -385,7 +440,7 @@ Estadísticas de Bodega:
         </div>
         """, unsafe_allow_html=True)
 
-st.markdown("### Sistema de análisis y optimización de operaciones portuarias")
+st.markdown("### Interfaz de análisis y optimización de operaciones portuarias")
 
 # -----------------------------------------------------------------------------
 # 📁 Sidebar - Data Loading and Parameters
@@ -617,14 +672,14 @@ with st.sidebar:
                 st.warning("⚠️ El tiempo de llegada de camiones debe ser menor al tiempo de atraque")
         
         with col4:
-            tasa_llegada_factor = st.number_input(
-                "Factor tasa llegada buques",
-                min_value=0.5,
-                max_value=2.0,
-                value=1.08,
-                step=0.01,
-                help="Factor multiplicador de llegada"
-            )
+            # tasa_llegada_factor = st.number_input(
+            #     "Factor tasa llegada buques",
+            #     min_value=0.5,
+            #     max_value=2.0,
+            #     value=1.08,
+            #     step=0.01,
+            #     help="Factor multiplicador de llegada"
+            # )
             
             max_rada = st.number_input(
                 "Máximo buques en rada",
@@ -666,6 +721,7 @@ if 'simulation_results' not in st.session_state:
 # Run simulation
 if sim_button and data_valid:
     with st.spinner("🔄 Ejecutando simulación..."):
+        start_time = time.time()
         progress_bar = st.progress(0, text="Inicializando simulación...")
         
         try:
@@ -728,11 +784,15 @@ if sim_button and data_valid:
             progress_bar.progress(90, text="Procesando resultados...")
             time.sleep(0.5)
             
+            # Calculate execution time
+            execution_time = time.time() - start_time
+            
             # Store results in session state
             st.session_state.simulation_results = {
                 'df_buques': df_buques,
                 'df_cola': df_cola,
                 'df_bodega': df_bodega,
+                'execution_time': execution_time,
                 'params': {
                     'años': años,
                     'camiones_dedicados': cam_dedic,
@@ -760,7 +820,11 @@ if sim_button and data_valid:
             progress_bar.empty()
             
             st.balloons()
-            st.success("✅ Simulación completada exitosamente - Resultados listos para análisis")
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.success("✅ Simulación completada exitosamente - Resultados listos para análisis")
+            with col2:
+                st.info(f"⏱️ Tiempo: {execution_time:.1f} seg")
             
         except Exception as e:
             progress_bar.empty()
@@ -804,8 +868,7 @@ if st.session_state.simulation_results:
         with col2:
             st.metric("Movimientos totales", f"{len(df_bodega):,}")
         with col3:
-            camiones_bodega_count = len(df_bodega[df_bodega['actividad camion '] == 'cargar en bodega']) if 'actividad camion ' in df_bodega.columns else 0
-            st.metric("Camiones a bodega", f"{camiones_bodega_count}")
+            st.metric("Camiones a bodega", f"{params['camiones_dedicados']}")
     
     # Tabs for detailed analysis
     st.header("📈 Centro de Análisis Detallado")
@@ -1071,9 +1134,9 @@ st.markdown(
     <div class="professional-footer">
         <div class="company-name">ELOGIS - Consultoría Logística</div>
         <p>Sistema de Simulación Puerto Panul</p>
-        <p>Herman Gothe - © 2025 ELOGIS</p>
+        <p>© 2025 ELOGIS. Todos los derechos reservados.</p>
         <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
-            Soluciones especializadas en optimización de operaciones y logística
+            Soluciones para optimización de operaciones y logística
         </p>
     </div>
     """,
