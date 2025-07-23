@@ -14,14 +14,9 @@ import seaborn as sns
 import streamlit as st
 from datetime import datetime
 
-try:
-    from clases_sim import simulacion, load_data
-    import clases_sim
-    from sim_puerto import run_sim
-    SIMULATION_AVAILABLE = True
-except ImportError:
-    SIMULATION_AVAILABLE = False
-    st.error("⚠️ ")
+
+from clases_sim import simulacion, load_data
+    
 
 # -----------------------------------------------------------------------------
 # Configuracion pagina
