@@ -347,6 +347,7 @@ page = st.sidebar.selectbox(
     "📄 Seleccionar Página",
     ["🚢 Simulación", "📖 Guía de Usuario"],
     index=0
+)
 
 
 # -----------------------------------------------------------------------------
