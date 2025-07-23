@@ -14,7 +14,6 @@ import seaborn as sns
 import streamlit as st
 from datetime import datetime
 
-# Import the actual simulation modules
 try:
     from clases_sim import simulacion, load_data
     import clases_sim
@@ -46,13 +45,13 @@ REQUIRED_BUQUES_COLS: List[str] = [
     "total_detenciones", "total_falta_equipos", "tonelaje",
 ]
 
-# Additional optional columns for buques
+
 OPTIONAL_BUQUES_COLS: List[str] = [
     "inicio_descarga", "primera_espia"
 ]
 
-# GitHub repository URL
-GITHUB_REPO_URL = "https://github.com/Ignaciagothe/sim_puerto"  # Replace with actual URL
+
+GITHUB_REPO_URL = "https://github.com/Ignaciagothe/sim_puerto"  
 
 # -----------------------------------------------------------------------------
 # CSS estilo
@@ -235,9 +234,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------------------------------------------------------
-# 🏗️ Helper Functions
-# -----------------------------------------------------------------------------
+
 @st.cache_data
 def load_file(file) -> pd.DataFrame:
     """Load CSV or Excel file with proper error handling."""
@@ -344,18 +341,16 @@ def calculate_real_data_statistics(buq_df: pd.DataFrame) -> dict:
     return stats
 
 # -----------------------------------------------------------------------------
-# Selecion de paginas
+# Selección de pagina
 # -----------------------------------------------------------------------------
 page = st.sidebar.selectbox(
     "📄 Seleccionar Página",
     ["🚢 Simulación", "📖 Guía de Usuario"],
     index=0
-)
-
 
 
 # -----------------------------------------------------------------------------
-# pagina manual - Guia usuario
+# pagina 1  - Guia usuario
 # -----------------------------------------------------------------------------
 
 if page == "📖 Guía de Usuario":
@@ -508,9 +503,7 @@ if page == "📖 Guía de Usuario":
 else:
     if 'simulation_results' not in st.session_state:
         st.session_state.simulation_results = None
-        
-    # col1=st.columns([3, 1])
-    # with col1:
+    
     st.markdown(f"""
     <div class="company-header">
         <h1> Puerto Panul - Sistema de Simulación Logística</h1>
@@ -524,16 +517,8 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-    
-    # with col2:
-    #     st.markdown(f"""
-    #     <div style='text-align: right; padding: 1rem; color: #666;'>
-    #         <small><strong>Sesión activa</strong></small><br>
-    #         <small>{datetime.now().strftime("%d/%m/%Y %H:%M")}</small>
-    #     </div>
-    #     """, unsafe_allow_html=True)
 
-    st.markdown("### Interfaz de análisis y optimización de operaciones portuarias")
+    st.markdown("## Interfaz de análisis y optimización de operaciones portuarias")
 
     # -----------------------------------------------------------------------------
     # Barra lateral - Subir Datos y parametros
@@ -583,10 +568,6 @@ else:
                     with st.expander("👁️ Vista previa - Buques", expanded=False):
                         st.dataframe(buq_df.head(), use_container_width=True)
                         st.caption(f"Mostrando primeras 5 filas de {len(buq_df):,} registros totales")
-                    # Check for optional columns
-                    optional_present = [col for col in OPTIONAL_BUQUES_COLS if col in buq_df.columns]
-                    if optional_present:
-                        st.info(f"ℹ️ Columnas opcionales detectadas: {', '.join(optional_present)}")
                 else:
                     st.error(f"❌ Faltan columnas en buques: {', '.join(missing)}")
                     data_valid = False
@@ -666,7 +647,7 @@ else:
                 disabled=(cam_dedic == 0)
             ) / 100.0
         
-        with st.expander("⏱️ Tiempos Operacionales (minutos)", expanded=False):
+        with st.expander("⏱️ Tiempos Operacionales", expanded=False):
             st.markdown("**Tiempos de Camiones (minutos)**")
             col1, col2 = st.columns(2)
             
@@ -757,7 +738,6 @@ else:
                     help="Tiempo antes de que lleguen camiones"
                 )
                 
-                # Validation
                 if tiempo_llegada_camiones >= tiempo_atraque:
                     st.warning("⚠️ El tiempo de llegada de camiones debe ser menor al tiempo de atraque")
             
@@ -946,13 +926,11 @@ else:
             with col3:
                 st.metric("Camiones a bodega", f"{params['camiones_dedicados']}")
         
-        # ventana para análisis detallado
-        st.header("📈  Análisis")
+        st.header("📈 Análisis")
         tab_summary, tab_charts, tab_data, tab_export = st.tabs(
             ["Resultados prinicpales", " Graficos ", " Tablas de Datos", " Exportar"]
         )
         
-        #  ventana resumen
         with tab_summary:
             col1, col2 = st.columns(2)
             
@@ -971,7 +949,6 @@ else:
                     use_container_width=True
                 )
             
-      
             st.subheader("Distribución de Tiempos")
             col1, col2, col3 = st.columns(3)
             with col1:
@@ -984,7 +961,7 @@ else:
         # ventana graficos
         with tab_charts:
             
-            st.subheader("📊 Comparación: Datos Reales vs Simulación")
+            st.subheader("Datos Reales vs Simulación")
             
             col1, col2 = st.columns(2)
             
@@ -1026,8 +1003,6 @@ else:
                     ax1.grid(True, alpha=0.3, linestyle='--')
                     
                    
-                   
-                
                 # datos simulados histogramas
                 sns.histplot(data=df_buques, x='Tiempo descarga (dias)', 
                             bins=30, kde=True, color="#4a87d6", alpha=0.7, ax=ax2)
@@ -1237,7 +1212,7 @@ else:
     st.markdown(
         """
         <div class="professional-footer">
-            <div class="company-name"> © 2025 ELOGIS Data Science - Consultoría Logística</div>
+            <div class="company-name"> © 2025 ELOGIS - Consultoría Logística y Data Science </div>
             <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
                 Soluciones para optimización de operaciones y logística
             </p>
