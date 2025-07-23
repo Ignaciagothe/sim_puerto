@@ -671,15 +671,15 @@ with st.sidebar:
             if tiempo_llegada_camiones >= tiempo_atraque:
                 st.warning("⚠️ El tiempo de llegada de camiones debe ser menor al tiempo de atraque")
         
-        with col4:
-            # tasa_llegada_factor = st.number_input(
-            #     "Factor tasa llegada buques",
-            #     min_value=0.5,
-            #     max_value=2.0,
-            #     value=1.08,
-            #     step=0.01,
-            #     help="Factor multiplicador de llegada"
-            # )
+        # with col4:
+        #     tasa_llegada_factor = st.number_input(
+        #         "Factor tasa llegada buques",
+        #         min_value=0.5,
+        #         max_value=2.0,
+        #         value=1.08,
+        #         step=0.01,
+        #         help="Factor multiplicador de llegada"
+        #     )
             
             max_rada = st.number_input(
                 "Máximo buques en rada",
@@ -690,6 +690,7 @@ with st.sidebar:
             )
     
     # Simulation button
+    
     st.divider()
     col1, col2 = st.columns(2)
     with col1:
@@ -703,9 +704,13 @@ with st.sidebar:
         if st.button(
             "🔄 Valores por Defecto",
             use_container_width=True,
-            help="Restaurar todos los parámetros a sus valores por defecto"
+            help="Restaurar todos los parámetros a sus valores por defecto y limpiar resultados"
         ):
+            # Clear session state
+            if 'simulation_results' in st.session_state:
+                del st.session_state.simulation_results
             st.rerun()
+
 
 # -----------------------------------------------------------------------------
 # 📊 Main Content Area
@@ -719,10 +724,17 @@ if 'simulation_results' not in st.session_state:
     st.session_state.simulation_results = None
 
 # Run simulation
+# Run simulation
 if sim_button and data_valid:
+    # Clear previous results
+    if 'simulation_results' in st.session_state:
+        del st.session_state.simulation_results
+    
     with st.spinner("🔄 Ejecutando simulación..."):
         start_time = time.time()
         progress_bar = st.progress(0, text="Inicializando simulación...")
+
+        
         
         try:
             # Update progress
@@ -750,7 +762,7 @@ if sim_button and data_valid:
                 'TIEMPO_SALIDA_DE_BODEGA': tiempo_salida_bodega,
                 'TIEMPO_ATRAQUE': tiempo_atraque,
                 'TIEMPO_LLEGADA_CAMIONES': tiempo_llegada_camiones,
-                'TASA_LLEGADA_FACTOR': tasa_llegada_factor,
+                'TASA_LLEGADA_FACTOR': 1.08,  # Default value, can be adjusted
                 'MAXIMO_RADA': int(max_rada)
             }
             
@@ -810,7 +822,7 @@ if sim_button and data_valid:
                     'tiempo_salida_bodega': tiempo_salida_bodega,
                     'tiempo_atraque': tiempo_atraque,
                     'tiempo_llegada_camiones': tiempo_llegada_camiones,
-                    'tasa_llegada_factor': tasa_llegada_factor,
+                    'tasa_llegada_factor': 1.08,
                     'max_rada': int(max_rada)
                 }
             }
@@ -1132,9 +1144,8 @@ st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown(
     """
     <div class="professional-footer">
-        <div class="company-name">ELOGIS - Consultoría Logística</div>
+        <div class="company-name"> © 2025 ELOGIS Data Science - Consultoría Logística</div>
         <p>Sistema de Simulación Puerto Panul</p>
-        <p>© 2025 ELOGIS. Todos los derechos reservados.</p>
         <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
             Soluciones para optimización de operaciones y logística
         </p>

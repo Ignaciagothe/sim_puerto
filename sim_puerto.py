@@ -42,7 +42,7 @@ def run_sim(
     return df_buques, df_cola, df_bodega, summary
 
 
-# --- KPIs principales para mostrar en la UI -----------------------------
+# --------------------- KPIs principales para mostrar en la UI -----------------------------
 def _kpis(df_buques: pd.DataFrame, df_cola: pd.DataFrame, df_bodega: pd.DataFrame | None):
     kpi = {}
     kpi["Tiempo medio de espera (días)"] = df_buques["Tiempo de espera (dias)"].mean()

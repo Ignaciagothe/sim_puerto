@@ -91,6 +91,8 @@ def load_data(camiones_df: pd.DataFrame, buques_df: pd.DataFrame):
     buques['total_detenciones'] = buques['total_detenciones']*60
     buques['minutos_entre_arribos'] = buques['tiempo_entre_arribos']*60
     buques['total_falta_equipos'] = buques['total_falta_equipos']*60
+    buques = buques[buques['dias_delay'] > 0]
+    buques = buques[buques['dias_delay'] < 0.5]
 
     tasa_llegada_buques = 1/(buques['minutos_entre_arribos'].mean())
 
