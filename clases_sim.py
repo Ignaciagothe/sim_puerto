@@ -249,7 +249,8 @@ class Camion:
             yield env.timeout(TIEMPO_CARGAR_EN_CHUTE)
         req_puerta_salida = puerto.puerta_salida.request()
         yield req_puerta_salida
-
+        # Tiempo de salida del puerto
+        yield env.timeout(TIEMPO_PUERTA_SALIDA)
         puerto.puerta_salida.release(req_puerta_salida)
 
 
@@ -282,7 +283,8 @@ class CamionDedicado:
             req_puerta = puerto.puerta_entrada.request()
             yield req_puerta
 
-            yield env.timeout(TIEMPO_PUERTA_ENTRADA)
+            # Tiempo de entrada exclusivo para camiones dedicados
+            yield env.timeout(TIEMPO_ENTRADA_CAMION_DEDICADO)
 
             with puerto.chutes.request() as req_chute:
                 yield req_chute

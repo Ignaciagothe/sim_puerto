@@ -14,14 +14,9 @@ import seaborn as sns
 import streamlit as st
 from datetime import datetime
 
-try:
-    from clases_sim import simulacion, load_data
-    import clases_sim
-    from sim_puerto import run_sim
-    SIMULATION_AVAILABLE = True
-except ImportError:
-    SIMULATION_AVAILABLE = False
-    st.error("⚠️ ")
+import clases_sim
+#from clases_sim import simulacion, load_data
+
 
 # -----------------------------------------------------------------------------
 # Configuracion pagina
@@ -648,7 +643,7 @@ else:
                 disabled=(cam_dedic == 0)
             ) / 100.0
         
-        with st.expander("⏱️ Tiempos Operacionales", expanded=False):
+        with st.expander("⏱️ Tiempos Operacionales", expanded=True):
             st.markdown("**Tiempos de Camiones (minutos)**")
             col1, col2 = st.columns(2)
             
@@ -752,31 +747,28 @@ else:
         
         # Boton simulacion
         st.divider()
-        col1, col2 = st.columns(2)
-        with col1:
-            sim_button = st.button(
-                "▶️ Ejecutar Simulación",
-                disabled=not (data_valid and SIMULATION_AVAILABLE),
-                use_container_width=True,
-                type="primary"
-            )
-        with col2:
-            if st.button(
-                "🔄 Valores por Defecto",
-                use_container_width=True,
-                help="Restaurar todos los parámetros a sus valores por defecto y limpiar resultados"
-            ):
-                # Clear session state
-                if 'simulation_results' in st.session_state:
-                    del st.session_state.simulation_results
-                st.rerun()
+        # col1 = st.columns(1)
+        # with col1:
+        sim_button = st.button(
+            "▶️ Ejecutar Simulación",
+            disabled=not (data_valid),
+            use_container_width=True,
+            type="primary"
+        )
+        # with col2:
+        #     if st.button(
+        #         "🔄 Valores por Defecto",
+        #         use_container_width=True,
+        #         help="Restaurar todos los parámetros a sus valores por defecto y limpiar resultados"
+        #     ):
+        #         # Clear session state
+        #         if 'simulation_results' in st.session_state:
+        #             del st.session_state.simulation_results
+        #         st.rerun()
 
     # -----------------------------------------------------------------------------
     #  Contenido principal
     # -----------------------------------------------------------------------------
-    if not SIMULATION_AVAILABLE:
-        st.error("⚠️ Los módulos de simulación no están disponibles. Por favor, verifica la instalación.")
-        st.stop()
 
    
     if sim_button and data_valid:
@@ -791,7 +783,7 @@ else:
             try:
                 progress_bar.progress(20, text="Cargando datos históricos...")
                 time.sleep(0.5)
-                load_data(cam_df, buq_df)
+                clases_sim.load_data(cam_df, buq_df)
                 progress_bar.progress(40, text="Configurando parámetros...")
                 time.sleep(0.5)
                 progress_bar.progress(60, text="Ejecutando simulación...")
@@ -815,7 +807,7 @@ else:
                     setattr(clases_sim, param, value)
                 
                 if cam_dedic > 0:
-                    df_buques, df_cola, df_bodega = simulacion(
+                    df_buques, df_cola, df_bodega = clases_sim.simulacion(
                         años=años,
                         camiones_dedicados=cam_dedic,
                         grano=grano_ini,
@@ -825,7 +817,7 @@ else:
                         seed=int(semilla)
                     )
                 else:
-                    results = simulacion(
+                    results = clases_sim.simulacion(
                         años=años,
                         camiones_dedicados=0,
                         grano=0,
