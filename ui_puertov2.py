@@ -666,7 +666,7 @@ else:
                     "Tiempo puerta salida",
                     min_value=1.0,
                     max_value=20.0,
-                    value=8.16,
+                    value=8.0,
                     step=0.5,
                     help="Tiempo para salir del puerto"
                 )
@@ -675,7 +675,7 @@ else:
                     "Tiempo cargar en chute",
                     min_value=1.0,
                     max_value=20.0,
-                    value=7.28,
+                    value=7.0,
                     step=0.5,
                     help="Tiempo de carga en chute"
                 )
@@ -781,8 +781,8 @@ else:
    
     if sim_button and data_valid:
         
-        if 'simulation_results' in st.session_state:
-            del st.session_state.simulation_results
+        # if 'simulation_results' in st.session_state:
+        #     del st.session_state.simulation_results
         
         with st.spinner("🔄 Ejecutando simulación..."):
             start_time = time.time()
