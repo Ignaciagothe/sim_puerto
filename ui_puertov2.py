@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-"""
-Enhanced Streamlit Interface for Port Simulation
-Puerto Panul - Logistics Simulation Tool
-Developed by ELOGIS - Consultoría Logística
-Lead Consultant: Herman Gothe
-"""
-
 from __future__ import annotations
 
 import io
@@ -32,7 +25,7 @@ except ImportError:
     st.error("⚠️ ")
 
 # -----------------------------------------------------------------------------
-# 🔧 Page Configuration
+# Configuracion pagina
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="ELOGIS - Simulación Puerto Panul",
@@ -42,7 +35,7 @@ st.set_page_config(
 )
 
 # -----------------------------------------------------------------------------
-# 📄 Constants
+# Constantes
 # -----------------------------------------------------------------------------
 REQUIRED_CAMIONES_COLS: List[str] = [
     "año", "turno", "min_entre_camiones", "capacidad",
@@ -62,7 +55,7 @@ OPTIONAL_BUQUES_COLS: List[str] = [
 GITHUB_REPO_URL = "https://github.com/Ignaciagothe/sim_puerto"  # Replace with actual URL
 
 # -----------------------------------------------------------------------------
-# 🎨 Custom CSS
+# CSS estilo
 # -----------------------------------------------------------------------------
 st.markdown("""
 <style>
@@ -276,7 +269,7 @@ def create_metric_card(label: str, value: float) -> None:
         st.metric(label, f"{value:,.2f}")
 
 def generate_summary_report(df_buques: pd.DataFrame, df_cola: pd.DataFrame, df_bodega: pd.DataFrame = None, params: dict = None) -> str:
-    """Generate a professional text summary report of the simulation results."""
+    """Generar resumen ejecutivo de los resultados de la simulación"""
     report = f"""
 ================================================================================
                  REPORTE DE SIMULACIÓN - PUERTO PANUL
@@ -333,7 +326,7 @@ Estadísticas de Bodega:
     report += """
 ================================================================================
                            © 2025 ELOGIS
-              Consultoría especializada en logística portuaria
+              Consultoría en Data Sceince y Logística 
 ================================================================================
 """
     
@@ -351,7 +344,7 @@ def calculate_real_data_statistics(buq_df: pd.DataFrame) -> dict:
     return stats
 
 # -----------------------------------------------------------------------------
-# 📄 Main Page Selection
+# Selecion de paginas
 # -----------------------------------------------------------------------------
 page = st.sidebar.selectbox(
     "📄 Seleccionar Página",
@@ -362,7 +355,7 @@ page = st.sidebar.selectbox(
 
 
 # -----------------------------------------------------------------------------
-# Guia usuario
+# pagina manual - Guia usuario
 # -----------------------------------------------------------------------------
 
 if page == "📖 Guía de Usuario":
@@ -510,7 +503,7 @@ if page == "📖 Guía de Usuario":
     
 
 # -----------------------------------------------------------------------------
-# 🚢 Pagina Simulacion
+# Pagina Simulacion
 # -----------------------------------------------------------------------------
 else:
     if 'simulation_results' not in st.session_state:
@@ -520,7 +513,7 @@ else:
     # with col1:
     st.markdown(f"""
     <div class="company-header">
-        <h1>🚢 Puerto Panul - Sistema de Simulación Logística</h1>
+        <h1> Puerto Panul - Sistema de Simulación Logística</h1>
         <p>Desarrollado por <strong>ELOGIS</strong> - Consultoría en Logística y Optimización</p>
         <a href="{GITHUB_REPO_URL}" class="github-link">
             <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" style="margin-right: 5px;">
@@ -907,7 +900,7 @@ else:
                 st.balloons()
                 col1, col2 = st.columns([3, 1])
                 with col1:
-                    st.success("✅ Simulación completada exitosamente - Resultados listos para análisis")
+                    st.success("✅ Simulación completada - Resultados disponibles")
                 with col2:
                     st.info(f"⏱️ Tiempo: {execution_time:.1f} seg")
                 
@@ -956,7 +949,7 @@ else:
         # ventana para análisis detallado
         st.header("📈  Análisis")
         tab_summary, tab_charts, tab_data, tab_export = st.tabs(
-            ["📋 Resumen", "📊 Visualizaciones", "🗃️ Datos Completos", "💾Exportación"]
+            ["Resultados prinicpales", " Graficos ", " Tablas de Datos", " Exportar"]
         )
         
         #  ventana resumen
