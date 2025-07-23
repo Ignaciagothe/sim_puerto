@@ -14,9 +14,9 @@ import seaborn as sns
 import streamlit as st
 from datetime import datetime
 
-
-from clases_sim import simulacion, load_data
 import clases_sim
+#from clases_sim import simulacion, load_data
+
 
 # -----------------------------------------------------------------------------
 # Configuracion pagina
@@ -783,7 +783,7 @@ else:
             try:
                 progress_bar.progress(20, text="Cargando datos históricos...")
                 time.sleep(0.5)
-                load_data(cam_df, buq_df)
+                clases_sim.load_data(cam_df, buq_df)
                 progress_bar.progress(40, text="Configurando parámetros...")
                 time.sleep(0.5)
                 progress_bar.progress(60, text="Ejecutando simulación...")
@@ -807,7 +807,7 @@ else:
                     setattr(clases_sim, param, value)
                 
                 if cam_dedic > 0:
-                    df_buques, df_cola, df_bodega = simulacion(
+                    df_buques, df_cola, df_bodega = clases_sim.simulacion(
                         años=años,
                         camiones_dedicados=cam_dedic,
                         grano=grano_ini,
@@ -817,7 +817,7 @@ else:
                         seed=int(semilla)
                     )
                 else:
-                    results = simulacion(
+                    results = clases_sim.simulacion(
                         años=años,
                         camiones_dedicados=0,
                         grano=0,
