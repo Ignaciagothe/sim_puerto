@@ -751,7 +751,7 @@ else:
         with col1:
             sim_button = st.button(
                 "▶️ Ejecutar Simulación",
-                disabled=not (data_valid and SIMULATION_AVAILABLE),
+                disabled=not (data_valid),
                 use_container_width=True,
                 type="primary"
             )
@@ -769,9 +769,6 @@ else:
     # -----------------------------------------------------------------------------
     #  Contenido principal
     # -----------------------------------------------------------------------------
-    if not SIMULATION_AVAILABLE:
-        st.error("⚠️ Los módulos de simulación no están disponibles. Por favor, verifica la instalación.")
-        st.stop()
 
    
     if sim_button and data_valid:
