@@ -16,7 +16,7 @@ from datetime import datetime
 
 
 from clases_sim import simulacion, load_data
-    
+import clases_sim
 
 # -----------------------------------------------------------------------------
 # Configuracion pagina
