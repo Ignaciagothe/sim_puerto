@@ -1,7 +1,5 @@
 
 
-
-
 # ========================
 #    Librerias
 # ========================
@@ -27,9 +25,7 @@ TIEMPO_PUERTA_ENTRADA = 2       # (minutos)
 TIEMPO_CARGAR_EN_CHUTE = 7.28     # (minutos)
 TIEMPO_ATRAQUE = 462  # (minutos)
 TIEMPO_LLEGADA_CAMIONES = 440
-# (factor de ajuste de la tasa de llegada de buques)
 TASA_LLEGADA_FACTOR = 1.08
-
 TIEMPO_A_BODEGA = 3             # (minutos)
 TIEMPO_DESCARGAR_EN_BODEGA = 6  # (minutos)
 TIEMPO_CARGAR_EN_BODEGA = 6     # (minutos)
@@ -38,23 +34,16 @@ TIEMPO_ENTRADA_CAMION_DEDICADO = 2  # (minutos)
 TIEMPO_SALIDA_DE_BODEGA = 2         # (minutos)
 MAXIMO_RADA = 8
 
-
-
-
 # =======================================
 #    Datos Historicos Camiones y Buques
 # ========================================
 
-# ----------------------------------------------------------
 def load_data(camiones_df: pd.DataFrame, buques_df: pd.DataFrame):
     """Carga los DataFrame y recalcula variables globales."""
     global camiones, buques, tasa_llegada, tasas_llegada, tasa_llegada_buques
-    # 1 · Guardar dataframes
+
     camiones = camiones_df.copy()
     buques   = buques_df.copy()
-
-    # 2 · (mismo código de filtrado y creación de columnas que ya tenías)
-
     camiones = camiones[camiones['año'] > 2022]
     camiones = camiones[camiones['capacidad'] > 20]
     tasa_llegada = 1/(camiones.groupby('turno')['min_entre_camiones'].mean())
@@ -69,11 +58,6 @@ def load_data(camiones_df: pd.DataFrame, buques_df: pd.DataFrame):
                             buques['primera_espia']).dt.total_seconds()/3600
     buques['minutos_delay'] = buques['horas_delay']*60
     buques['dias_delay'] = buques['horas_delay']/24
-    # No permitas valores negativos en el retraso
-    buques['minutos_delay'] = buques['minutos_delay'].clip(lower=0)
-
-    # buques.loc[buques['espera_sin_detenciones_externas'] < 0, 'espera_sin_detenciones_externas'] = 0
-
     buques = buques[-250:]
     buques['horas_de_espera'] = buques['tiempo_de_espera'].copy()
     buques['horas_de_descarga'] = buques['tiempo_descarga'].copy()
@@ -91,8 +75,7 @@ def load_data(camiones_df: pd.DataFrame, buques_df: pd.DataFrame):
     buques['total_detenciones'] = buques['total_detenciones']*60
     buques['minutos_entre_arribos'] = buques['tiempo_entre_arribos']*60
     buques['total_falta_equipos'] = buques['total_falta_equipos']*60
-    buques = buques[buques['dias_delay'] > 0]
-    buques = buques[buques['dias_delay'] < 0.5]
+
 
     tasa_llegada_buques = 1/(buques['minutos_entre_arribos'].mean())
 
@@ -102,51 +85,9 @@ def load_data(camiones_df: pd.DataFrame, buques_df: pd.DataFrame):
     tasa_llegada = 1/(camiones.groupby('turno')['min_entre_camiones'].mean())
     tasas_llegada = tasa_llegada.to_dict()
 
-    # …todo el bloque que procesa `buques`…
 
-    # 3 · Actualizar tasa global
-    tasa_llegada_buques = 1/(buques['minutos_entre_arribos'].mean())
-    tasa_llegada_buques *= TASA_LLEGADA_FACTOR
-
-# camiones = pd.read_csv('camiones1.csv')
-# camiones = camiones[camiones['año'] > 2022]
-# camiones = camiones[camiones['capacidad'] > 20]
-# tasa_llegada = 1/(camiones.groupby('turno')['min_entre_camiones'].mean())
-# tasas_llegada = tasa_llegada.to_dict()
-
-# buques = pd.read_excel('naves_epic.xlsx')
-# buques = buques[buques['tiempo_descarga'] < 140]
-# buques = buques[buques['tiempo_descarga'] > 30]
-# buques = buques[buques['tiempo_entre_arribos'] < 450]
-# buques['espera_sin_detenciones_externas'] = (
-#     buques['tiempo_de_espera']-buques['total_detenciones'])
-# buques['horas_delay'] = (buques['inicio_descarga'] -
-#                          buques['primera_espia']).dt.total_seconds()/3600
-# buques['minutos_delay'] = buques['horas_delay']*60
-# buques['dias_delay'] = buques['horas_delay']/24
-# # buques.loc[buques['espera_sin_detenciones_externas'] < 0, 'espera_sin_detenciones_externas'] = 0
-
-# buques = buques[-250:]
-# buques['horas_de_espera'] = buques['tiempo_de_espera'].copy()
-# buques['horas_de_descarga'] = buques['tiempo_descarga'].copy()
-# buques['horas_detencion'] = buques['total_detenciones'].copy()
-# buques['horas_entre_arribos'] = buques['tiempo_entre_arribos'].copy()
-# buques['horas_falta_equipos'] = buques['total_falta_equipos'].copy()
-# buques['Dias_de_espera_buque'] = buques['tiempo_de_espera']/24
-# buques['Dias_de_descarga_buque'] = buques['tiempo_descarga']/24
-# buques['Dias_detencion_buque'] = buques['total_detenciones']/24
-# buques['Dias_entre_arribos_buque'] = buques['tiempo_entre_arribos']/24
-# buques['Dias_falta_equipos_buque'] = buques['total_falta_equipos']/24
-# buques['Dias_espera_2'] = buques['espera_sin_detenciones_externas']/24
-# buques['tiempo_de_espera'] = buques['tiempo_de_espera']*60
-# buques['tiempo_descarga'] = buques['tiempo_descarga']*60
-# buques['total_detenciones'] = buques['total_detenciones']*60
-# buques['minutos_entre_arribos'] = buques['tiempo_entre_arribos']*60
-# buques['total_falta_equipos'] = buques['total_falta_equipos']*60
-
-# tasa_llegada_buques = 1/(buques['minutos_entre_arribos'].mean())
-
-# tasa_llegada_buques = tasa_llegada_buques*TASA_LLEGADA_FACTOR  # tasa
+    buques = buques[buques['dias_delay'] > 0]
+    buques = buques[buques['dias_delay'] < 0.5]
 
 
 def determinar_turno(hora):
@@ -333,7 +274,7 @@ class CamionDedicado:
             esperar = True
             while esperar:
                 yield puerto.falta_camiones_event
-                yield env.timeout(2)  # Pequeña demora adicional
+                yield env.timeout(2)
                 if len(puerto.puerta_entrada.users) == 0 and len(puerto.puerta_entrada.queue) == 0:
                     esperar = False
 
@@ -460,8 +401,6 @@ def generar_buques(env: simpy.Environment, puerto: Puerto):
     i_buques = 0
     while True:
         tiempo_entre_arribo = random.expovariate(tasa_llegada_buques)
-
-        # tiempo_entre_arribo = stats.expon.rvs(loc=loc, scale=scale, size=1)[0]
         yield env.timeout(tiempo_entre_arribo)
 
         # Si la cola es muy larga, se asume que el buque se pierde
@@ -601,53 +540,6 @@ def simulacion(años, camiones_dedicados=0, grano=0, cap=0, prob=0, buques_inici
     return df_buques, df_cola
 
 
-# --------------------------------------------
-# PRUEBAS MANUALES (NO se ejecutan al importar)
-# --------------------------------------------
-if __name__ == "__main__":
-    # Carga rápida con los datos por defecto
-    import pandas as pd
-    from pathlib import Path
-
-    camiones_df = pd.read_csv(Path("camiones1.csv"))
-    buques_df   = pd.read_excel(Path("naves_epic.xlsx"), engine="openpyxl")
-
-    load_data(camiones_df, buques_df)      # ← ahora sí existen 'buques', 'camiones'
-
-    # Prueba de 3 años sin bodega
-    df_buques, df_cola = simulacion(años=3, camiones_dedicados=0, seed=42)
-    print(df_buques.head())
-
-    # Otra prueba con bodega
-    df_buques2, df_cola2, df_bodega2 = simulacion(
-        años=3,
-        camiones_dedicados=20,
-        grano=1000,
-        cap=30,
-        prob=0.1,
-        buques_inicio_cola=7,
-        seed=33,
-    )
-    print(df_buques2.head())
 
 
 
-# df_buques, df_cola = simulacion(
-#     años=3, camiones_dedicados=0, seed=42)
-
-# num_con_camiones = 20
-# capacidad_camion_dedicado = 30
-# probabilidad_bodega = 0.1
-# grano_inicial_bodega = 1000
-# años_simulacion = 3
-# buques_inicio_cola = 7
-
-# df_buques_sim, df_cola_rada, df_bodega_sim = simulacion(
-#     años=3,
-#     camiones_dedicados=num_con_camiones,
-#     grano=grano_inicial_bodega,
-#     cap=capacidad_camion_dedicado,
-#     prob=probabilidad_bodega,
-#     buques_inicio_cola=buques_inicio_cola,
-#     seed=33
-# )
