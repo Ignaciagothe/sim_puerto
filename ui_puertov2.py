@@ -284,7 +284,7 @@ Tiempos Operacionales (minutos):
 --------------------------------
 • Tiempo puerta entrada: {params.get('tiempo_puerta_entrada', 'N/A')}
 • Tiempo puerta salida: {params.get('tiempo_puerta_salida', 'N/A')}
-• Tiempo cargar en chute: {params.get('tiempo_cargar_chute', 'N/A')}
+• Tiempo cargar en bascula: {params.get('tiempo_cargar_bascula', 'N/A')}
 • Tiempo atraque: {params.get('tiempo_atraque', 'N/A')}
 • Tiempo llegada camiones: {params.get('tiempo_llegada_camiones', 'N/A')}
 
@@ -666,13 +666,13 @@ else:
                     help="Tiempo para salir del puerto"
                 )
                 
-                tiempo_cargar_chute = st.number_input(
-                    "Tiempo cargar en chute",
+                tiempo_cargar_bascula = st.number_input(
+                    "Tiempo cargar bascula ",
                     min_value=1.0,
                     max_value=20.0,
                     value=7.0,
                     step=0.5,
-                    help="Tiempo de carga en chute"
+                    help="Minutos que tarda en cargar camion en bascula"
                 )
             
             with col2:
@@ -722,7 +722,15 @@ else:
                     max_value=1000,
                     value=462,
                     step=30,
-                    help="Tiempo total de atraque"
+                    help="Tiempo entre ultima espia buque anterior y primera espia buque siguiente"
+                )
+                tiempo_espiarse = st.number_input(
+                    "Tiempo de espiarse",
+                    min_value=1,
+                    max_value=10,
+                    value=2,
+                    step=1,
+                    help="Tiempo entre primera espia e inicio descarga (minutos)",
                 )
                 
                 tiempo_llegada_camiones = st.number_input(
@@ -791,7 +799,7 @@ else:
                     'TIEMPO_PUERTA_ENTRADA': tiempo_puerta_entrada,
                     'TIEMPO_PUERTA_SALIDA': tiempo_puerta_salida,
                     'TIEMPO_ENTRADA_CAMION_DEDICADO': tiempo_puerta_entrada,
-                    'TIEMPO_CARGAR_EN_CHUTE': tiempo_cargar_chute,
+                    'TIEMPO_CARGAR_EN_BASCULA': tiempo_cargar_bascula,
                     'TIEMPO_A_BODEGA': tiempo_a_bodega,
                     'TIEMPO_DESCARGAR_EN_BODEGA': tiempo_descargar_bodega,
                     'TIEMPO_CARGAR_EN_BODEGA': tiempo_cargar_bodega,
@@ -799,7 +807,8 @@ else:
                     'TIEMPO_ATRAQUE': tiempo_atraque,
                     'TIEMPO_LLEGADA_CAMIONES': tiempo_llegada_camiones,
                     'TASA_LLEGADA_FACTOR': 1.08,
-                    'MAXIMO_RADA': int(max_rada)
+                    'MAXIMO_RADA': int(max_rada),
+                    'TIEMPO_ESPIARSE': tiempo_espiarse
                 }
                 
                 # Definicion de los parametros en el script clases_sim module
@@ -854,7 +863,7 @@ else:
                         'semilla': semilla,
                         'tiempo_puerta_entrada': tiempo_puerta_entrada,
                         'tiempo_puerta_salida': tiempo_puerta_salida,
-                        'tiempo_cargar_chute': tiempo_cargar_chute,
+                        'tiempo_cargar_bascula': tiempo_cargar_bascula,
                         'tiempo_a_bodega': tiempo_a_bodega,
                         'tiempo_descargar_bodega': tiempo_descargar_bodega,
                         'tiempo_cargar_bodega': tiempo_cargar_bodega,
@@ -862,7 +871,8 @@ else:
                         'tiempo_atraque': tiempo_atraque,
                         'tiempo_llegada_camiones': tiempo_llegada_camiones,
                         'tasa_llegada_factor': 1.08,
-                        'max_rada': int(max_rada)
+                        'max_rada': int(max_rada),
+                        'tiempo_espiarse': tiempo_espiarse
                     }
                 }
                 

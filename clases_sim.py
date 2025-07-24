@@ -33,6 +33,7 @@ TIEMPO_CARGAR_EN_BODEGA = 6     # (minutos)
 TIEMPO_ENTRADA_CAMION_DEDICADO = 2  # (minutos)
 TIEMPO_SALIDA_DE_BODEGA = 2         # (minutos)
 MAXIMO_RADA = 8
+TIEMPO_ESPIARSE=2
 
 # =======================================
 #    Datos Historicos Camiones y Buques
@@ -179,8 +180,9 @@ class Buque:
 
             self.primera_espia = env.now
             self.tiempo_espera = self.primera_espia - self.arribo
+            yield env.timeout(TIEMPO_ESPIARSE)
 
-            yield env.timeout(choice(buques['minutos_delay'].values))
+            # yield env.timeout(choice(buques['minutos_delay'].values))
 
             # Cargar el grano en el muelle
             yield puerto.grano_muelle.put(self.tonelaje)
