@@ -164,7 +164,7 @@ st.markdown("""
         font-size: 0.9rem;
         margin-top: 0.5rem;
         padding: 0.3rem 0.8rem;
-        background: rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.5);
         border-radius: 5px;
         transition: all 0.3s ease;
     }
